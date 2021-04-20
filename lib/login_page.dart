@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jobsheet10/sign_in.dart';
+import 'package:jobsheet10/register.dart';
 
 import 'first_screen.dart';
 
@@ -22,9 +23,45 @@ class _LoginPageState extends State<LoginPage> {
               FlutterLogo(size: 150),
               SizedBox(height: 50),
               _signInButton(),
+              SizedBox(height: 20),
               _signInEmail(),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _signInEmail() {
+    return OutlineButton(
+      splashColor: Colors.grey,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Register()),
+        );
+      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+      highlightElevation: 0,
+      borderSide: BorderSide(color: Colors.grey),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Image(image: AssetImage("assets/email.png"), height: 35.0),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Text(
+                'Sign in with Email',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
