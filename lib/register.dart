@@ -14,6 +14,15 @@ class RegisterState extends State<Register> {
   final TextEditingController passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp().whenComplete(() {
+      print("completed");
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +59,6 @@ class RegisterState extends State<Register> {
                 alignment: Alignment.center,
                 child: RaisedButton(
                   onPressed: () async {
-                    await Firebase.initializeApp();
                     try {
                       UserCredential userCredential = await FirebaseAuth
                           .instance
@@ -59,14 +67,34 @@ class RegisterState extends State<Register> {
                               password: passwordController.text);
                     } on FirebaseAuthException catch (e) {
                       if (e.code == 'weak-password') {
-                        print('The password provided is too weak.');
+                        Widget okButton = FlatButton(
+                          child: Text("OK"),
+                          onPressed: () => Navigator.pop(context, true),
+                        );
+
+                        AlertDialog alert = AlertDialog(
+                          title: Text("Error"),
+                          content: Text("Password terlalu lemah."),
+                          actions: [
+                            okButton,
+                          ],
+                        );
+
+                        // show the dialog
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return alert;
+                          },
+                        );
                       } else if (e.code == 'email-already-in-use') {
                         print('The account already exists for that email.');
                         signinnow();
                       }
                     } catch (e) {
-                      signinnow();
+                      print(e);
                     }
+                    check_auth();
                   },
                   child: const Text('Submit'),
                 ),
@@ -80,15 +108,51 @@ class RegisterState extends State<Register> {
 
   signinnow() async {
     print('bobo');
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: emailController.text, password: passwordController.text);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        Widget okButton2 = FlatButton(
+          child: Text("OK"),
+          onPressed: () => Navigator.pop(context, true),
+        );
 
-    UserCredential userCredential = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(
-            email: emailController.text, password: passwordController.text);
-    final User user = userCredential.user;
+        AlertDialog alert2 = AlertDialog(
+          title: Text("Error"),
+          content: Text("Passwordnya salah!"),
+          actions: [
+            okButton2,
+          ],
+        );
 
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (BuildContext context) {
-      return FirstScreenEmail(user);
-    }));
+        // show the dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return alert2;
+          },
+        );
+      }
+    } catch (e) {
+      print(e);
+    }
+    check_auth();
+  }
+
+  check_auth() {
+    FirebaseAuth.instance.authStateChanges().listen((User user) {
+      if (user == null) {
+        print('User is currently signed out!');
+      } else {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (BuildContext context) {
+          return FirstScreenEmail(user);
+        }));
+      }
+    });
   }
 }
