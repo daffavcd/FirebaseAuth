@@ -16,6 +16,7 @@ class RegisterState extends State<Register> {
   @override
   void initState() {
     super.initState();
+    FirebaseAuth.instance.signOut();
     Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});
